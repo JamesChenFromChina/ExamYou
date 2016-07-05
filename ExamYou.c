@@ -48,6 +48,7 @@ typedef enum { false, true } bool;
 typedef void (*MenuItemFun)();
 
 #define MakeMenuItem(c,title,fun) { fun,c,title }
+#define MenuItemNULL MakeMenuItem('\0',"",(MenuItemFun)NULL)
 
 typedef struct {
     MenuItemFun fun;
@@ -56,7 +57,7 @@ typedef struct {
 } MenuItem;
 
 void MenuFunExit() {
-    printf("Bye.%s",ID);
+    printf("Bye.%s\n",ID);
     exit(0);
 }
 
@@ -75,7 +76,7 @@ Question questionList[QUESTION_NUM];
  * @return if c is uppercase return true,otherwise return false.
  */
 static inline bool checkUppercase(char c) {
-    return c > 'A' && c < 'Z';
+    return c >= 'A' && c <= 'Z';
 }
 
 /**
@@ -85,7 +86,7 @@ static inline bool checkUppercase(char c) {
  * @return if c is number return true,otherwise return false.
  */
 static inline bool checkNum(char c) {
-    return c > '0' && c <'9';
+    return c >= '0' && c <= '9';
 }
 
 /**
@@ -103,7 +104,7 @@ static inline bool checkID(const char *id) {
         if (!pass) return pass;
     }
     for (i = 0;i < ID_NUM_LEN; ++i) {
-        pass = pass && checkUppercase(id[index++]);
+        pass = pass && checkNum(id[index++]);
         if (!pass) return pass;
     }
     return pass;
@@ -136,16 +137,17 @@ void MenuFunCheckScore() {
 
 void PrintMenu(const MenuItem *itemList) {
     system("clear");
-    char c[2] =  {0};
+    char c[256] = {0};
     const MenuItem *pCurrent = NULL;
-    for (pCurrent = itemList; pCurrent != NULL; ++pCurrent) {
-        printf("(%c) %s.\n",pCurrent->c,pCurrent->title);
+    for (pCurrent = itemList; pCurrent->fun != NULL; ++pCurrent) {
+        printf("(%c) %s\n",pCurrent->c,pCurrent->title);
     }
     printf("*********************************\n");
     printf("Please input you choice : ");
-    scanf("%1c",c);
+    fflush(stdin);
+    scanf("%s",c);
 
-    for (pCurrent = itemList; pCurrent != NULL; ++pCurrent) {
+    for (pCurrent = itemList; pCurrent->fun != NULL; ++pCurrent) {
         if (c[0] == pCurrent->c) {
             pCurrent->fun();
         }
@@ -160,13 +162,12 @@ int main(int argc, char *argv[]) {
         printf("YOU ARE INPUT AN *INVALID* ID !!! \nThat program will be close immediately...");
         return 0;
     }
-
     while(true) {
         MenuItem menuItemList[] = {
             MakeMenuItem('1',"Start test.",MenuFunStartTest),
             MakeMenuItem('2',"Check score.",MenuFunCheckScore),
-            MakeMenuItem('3',"Exit.",MenuFunExit)
-        };
+            MakeMenuItem('3',"Exit.",MenuFunExit),
+            MenuItemNULL };
         PrintMenu(menuItemList);
     }
 

@@ -2,4 +2,7 @@ all:ExamYou
 
 
 ExamYou: ExamYou.c
-	gcc -g -Wall ExamYou.c -o ExamYou
+	gcc -g ExamYou.c -o ExamYou
+
+clean:
+	rm ExamYou
